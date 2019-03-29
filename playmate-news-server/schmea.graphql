@@ -1,0 +1,42 @@
+  # Comments in GraphQL are defined with the hash (#) symbol.
+
+
+
+  # A single entry in the playmate news feed
+  type Entry {
+    link: String!
+    description: String
+    votes: Int!
+    id: ID!
+    user: String!
+    created: DateTime
+  }
+
+
+  # The "Query" type is the root of all GraphQL queries.
+  # (A "Mutation" type will be covered later on.)
+  type Query {
+    entries: [Entry],
+    search (pattern: String!): [Entry]
+  }
+
+  type Mutation{
+    insertEntry(link: String!, description: String!, user: String!): Entry
+  }
+
+  scalar DateTime
+  scalar EmailAddress
+  scalar NegativeFloat
+  scalar NegativeInt
+  scalar NonNegativeFloat
+  scalar NonNegativeInt
+  scalar NonPositiveFloat
+  scalar NonPositiveInt
+  scalar PhoneNumber
+  scalar PositiveFloat
+  scalar PositiveInt
+  scalar PostalCode
+  scalar RegularExpression
+  scalar UnsignedFloat
+  scalar UnsignedInt
+  scalar URL
