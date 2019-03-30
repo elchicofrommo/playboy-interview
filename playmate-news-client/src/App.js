@@ -15,7 +15,9 @@ let searchPattern = "coding";
 // contains the Apollo query for getting all the news from the server
 const AllNewsEntries = () => (
 
-  <Query query ={gql("query { entries { link description user votes created id } }") }>
+  <Query 
+    query ={gql("query { entries { link description user votes created id } }") }
+    pollInterval={500}>
 
       {({ loading, error, data }) => {
       if (loading) return "<p>Loading...</p>";
