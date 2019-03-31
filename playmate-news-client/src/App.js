@@ -1,68 +1,120 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import logo from './logo.svg';
 import './App.css';
 import {ApolloProvider, ApolloConsumer, Query, Mutation} from "react-apollo";
 import ApolloClient from "apollo-boost";
-import gql from "graphql-tag";
+import {ALL_NEWS, SEARCH_NEWS, ADD_NEWS} from "./Queries";
+
 
 const client = new ApolloClient({
   uri: "http://localhost:4000/"
 });
 
 let searchPattern = "coding";
+let addLink = "http://www.testlink.com"
+let addDescription = "test description";
+let addUser = "testUser";
+
+let link = "http://www.woowoo.com"
+let description = "mario test description";
+let user = "mario";
 
 // contains the Apollo query for getting all the news from the server
-const AllNewsEntries = () => (
+const AllNewsEntries = () => {
 
-  <Query 
-    query ={gql("query { entries { link description user votes created id } }") }
-    pollInterval={500}>
+  return(
+    <Query 
+      query ={ALL_NEWS}
+      pollInterval={500}>
 
-      {({ loading, error, data }) => {
-      if (loading) return "<p>Loading...</p>";
-      if (error) return  "<p>Error :(</p>";
-      return outputNewsEntries(data.entries);
-    }}
-  </Query>
-);
+        {({ loading, error, data }) => {
+        if (loading) return "<p>Loading...</p>";
+        if (error) return  "<p>Error :(</p>";
+        return outputNewsEntries(data.entries);
+      }}
+    </Query>
+  );
+};
 
 // contains the Apollo query for getting search reults from the server
-const SearchNewsEntries = () => (
+const SearchNewsEntries = () => {
 
-  <Query query ={gql("query { search(pattern: \""+searchPattern+"\") { link description user votes created id } }") }>
 
-      {({ loading, error, data }) => {
-      if (loading) return "<p>Loading...</p>";
-      if (error) return  "<p>Error :(</p>";
-      
-      return outputSearchEntries(data.search);
-    }}
-  </Query>
-);
+  let map : { [key: string]: string} = {};
+  map["pattern"] = searchPattern;
+
+  return(
+    <Query 
+      query ={ SEARCH_NEWS }
+      variables = {map}
+      >
+
+        {({ loading, error, data }) => {
+        if (loading) return "<p>Loading...</p>";
+        if (error) return  "<p>Error :(</p>";
+        
+        return outputSearchEntries(data.search);
+      }}
+    </Query>
+  );
+};
+
+
+/**
+/
+*/
+const AddResultsFiller = () => {
+  return React.createElement('div', { className: "newsHeader"}, 'Nothing added yet');
+}
+
+let AddResults= AddResultsFiller;
+
+const AddNewsEntry = () => {
+
+      let map : { [key: string]: string} = {};
+      map["link"] = addLink;
+      map["description"] = addDescription;
+      map["user"] = addUser;
+
+      alert("link is " + map["link"]);
+      alert("description is " + map["description"]);
+      alert("user is " + map["user"]);
+
+      return (
+
+        <Mutation 
+          mutation={ADD_NEWS}
+          variables={map}
+          ignoreResults={false}
+          client={client}>
+
+            {({ loading, error, data , called, client}) => {
+
+              if (loading) return React.createElement('div', { className: "newsHeader"}, 'Loading ...');
+              if (error) return  React.createElement('div', { className: "newsHeader"}, '*** ERROR ***');
+
+alert("loading is " + loading);
+alert("error is " + error);
+alert("data is " + data);
+alert(" the mutate was called? " + called);
+alert("the client shoudl be an object? " + client )
+              return outputNewsEntries(data.insertEntry);
+            }}
+        </Mutation>
+
+      );
+    };
 
 // used to display either allnews entries or search results
 let PlaymateNewsEntries =  AllNewsEntries;
-let AddResults = () => {
-  return "<p>No Add Yet</p>";
-}
 
-/**
-Adds a new News entry to the playmante news board
-*/
-function addNewsEntry(){
-  var addLink = this.refs.addLink.value;
-  var addDescription = this.refs.addDescription.value;
-  var addUser = this.refs.addUser.value;
-}
 
 /**
 Function to run the search query and display results
 */
 function runSearchQuery(){
   searchPattern = this.refs.searchTerm.value;
-
-
+  
   PlaymateNewsEntries = SearchNewsEntries;
   ReactDOM.render(<App />, document.getElementById('root'));
 }// end of function runSearchQuery
@@ -113,58 +165,58 @@ function outputNewsEntries(myMap){
 */
 export default class App extends React.Component {
 
-  addLink = "";
-  addDescription = "";
-  addUser = ""; 
-  client = new ApolloClient({
-    uri: "http://localhost:4000/"
-  });
 
-  /**
-  Adds a new News entry to the playmante news board
-  */
-  addNewsEntry(){
-    this.addLink = this.refs.addLink.value;
-    this.addDescription = this.refs.addDescription.value;
-    this.addUser = this.refs.addUser.value;
+  user = "mario"
+  description = "description"
+  link = "http://www.test.com"
 
+  variables : { [key: string]: string} = {};
+  addEntryComplete (data){
 
-    var AddNewsEntry = (link, user, description) => {
-
-      var myQuery = this.generateAddQuery();
-
-      alert(myQuery);
-
-      return (
-  //<Query query ={gql("query { search(pattern: \""+searchPattern+"\") { link description user votes created id } }") }>
-
-        <Mutation mutation={gql("mutation { insertEntry( link: $link,  description: $description, user:  $user){ link, description, user, votes, created, id } }") }>
-
-            {({ loading, error, data }) => {
-              if (loading) return "<p>Loading...</p>";
-              if (error) return  "<p>Error</p>";
-
-              return "<p>success</p>";
-            }}
-        </Mutation>
-
-      );
-    };
-
-    alert("before the AddNewsEntry function prototype");
-    AddResults = AddNewsEntry.call(this.addLink, this.addDescription, this.addUser);
-    alert("after the AddNewsEntry function prototype");
-   // ReactDOM.render(this, document.getElementById('root'));
+    console.log("add is complete with " + data);
 
   }
 
-  generateAddQuery(){
-      var addEntry = "mutation { insertEntry( link: \""+this.addLink+"\",  description: \""+this.addDescription+"\", user:  \""+this.addUser+"\"){ link, description, user, votes, created, id } }"
-      return addEntry;
+  saveDescription(input){
+    console.log("saving description: " + input )
+    this.variables["addDescription"] = input;
+    description = input;
+    this.description = input;
   }
+  saveLink(input){
+    console.log("saving input: " + input )
+    this.variables["addLink"] = input;
+    link = input;
+    this.link = input
+  }
+
+  saveUser(input){
+    console.log("saving user: " + input )
+    this.variables["addUser"] = input;
+    user = input;
+    this.user = input;
+  }
+
+
+  getVariables = ()=>{
+    alert ("I'm in the getVariables")
+    
+    this.variables["link"] = this.addLink;
+    this.variables["user"] = this.addUser;
+    this.variables["myDescription"] = this.addDescription ;
+
+   // let list = {this.link, this.description, this.user};
+
+
+
+   // return list
+  }
+
 
 
   render() {
+
+
     return (
       <ApolloProvider client={client}>
 
@@ -177,28 +229,41 @@ export default class App extends React.Component {
         <PlaymateNewsEntries/>
         </div>
 
-        <div className="newsHeader">
-          ADD NEW NEWS 
-        </div>
+        <Mutation mutation={ADD_NEWS} onCompleted={this.addEntryComplete.bind(this)}>
+        {insertEntry=>(
+          <form onSubmit={e=> {
+            e.preventDefault();
+           
+            insertEntry({variables: {link, description, user} })
+          }}>
 
-        <div className="addRow">
-          <div className="addLabel">Description:</div>
-          <input className="textInput" ref="addDescription"></input>
-        </div>
-        <div className="addRow">
-          <div className="addLabel">Link: </div>
-          <input className="textInput"  ref="addLink"></input>
-        </div>
-        <div className="addRow">
-          <div className="addLabel">User Name:</div>
-          <input className="textInput"  ref="addUser"></input>
-        </div>
-        <div className="addRow" >
-          <button onClick={this.addNewsEntry.bind(this)}>Add</button>
-        </div>
-        <div className="addRow">
-          <AddResults />
-        </div>
+            <div className="newsHeader">
+              ADD NEW NEWS 
+            </div>
+
+            <div className="addRow">
+              <div className="addLabel">Description:</div>
+              <input className="textInput" ref="addDescription" onBlur={e=>(this.saveDescription(e.target.value))}></input>
+            </div>
+            <div className="addRow">
+              <div className="addLabel">Link: </div>
+              <input className="textInput"  ref="addLink" onBlur={e=>(this.saveLink(e.target.value))}></input>
+            </div>
+            <div className="addRow">
+              <div className="addLabel">User Name:</div>
+              <input className="textInput"  ref="addUser" onBlur={e=>(this.saveUser(e.target.value))}></input>
+            </div>
+            <div className="addRow" >
+              <button>Add</button>
+            </div>
+            <div className="addRow">
+              <AddResults />
+            </div>
+          </form>
+
+        )}
+
+        </Mutation>
       </div>
 
 

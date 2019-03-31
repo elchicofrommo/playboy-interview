@@ -96,6 +96,8 @@ function insertEntry(link, description, user) {
         
     }
     entries.push(entry)
+    
+    console.log("pushed in another entry, link is " + link);
     return entry
 }
 /** searches all entries and returns an array of the entries that have pattern matches in either the link or description field
