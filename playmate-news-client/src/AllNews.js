@@ -9,9 +9,8 @@ import {ALL_NEWS} from "./Queries";
 
 export default class AllNews extends Component{
 
-	constructor(postQuery){
-		super(postQuery)
-		this.postQuery = postQuery
+	constructor(props){
+		super(props)
 	}
 
 	render(){

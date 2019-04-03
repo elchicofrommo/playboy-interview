@@ -15,31 +15,44 @@ const client = new ApolloClient({
 
 
 
+/**
+/
+*/
+const Filler = () => {
+  return React.createElement('div', { }, '');
+}
+
+let AddResults= Filler;
+
+
+// used to display either allnews entries or search results
+let PlaymateNewsEntries =  AllNews;
+
+
+
+/**
+Function to run the search query and display results
+*/
+function runSearchQuery(){
+  PlaymateNewsEntries = SearchNews;
+  ReactDOM.render(<App />, document.getElementById('root'));
+}// end of function runSearchQuery
+
+/* Function to clear search results and return to just the news feed
+*/
+function clearSearchResults(){
+  PlaymateNewsEntries = AllNews;
+  ReactDOM.render(<App />, document.getElementById('root'));
+}
+
+
+
 
 /** 
 (/  --- not sure why, but this squence fixes my editor sytax so I'm leaving it in.
   Class for primary react component
 */
 export default class App extends React.Component {
-
-
-  /**
-  /
-  */
-  Filler = () => {
-    return React.createElement('div', { }, '');
-  }
-
-  AddResults = this.Filler;
-
-
-  // used to display either allnews entries or search results
-  PlaymateNewsEntries =  AllNews;
-
-
-
-
-
 
   constructor(props){
 
@@ -49,7 +62,6 @@ export default class App extends React.Component {
       description: '',
       link: ''
     }
-    this.clearSearchResults = this.clearSearchResults.bind(this);
   }
 
 
@@ -73,23 +85,6 @@ export default class App extends React.Component {
     SearchNews.handleUserInput(e);
   }
 
-  /**
-  Function to run the search query and display results
-  */
-  runSearchQuery(){
-    this.PlaymateNewsEntries = SearchNews;
-    ReactDOM.render(<App />, document.getElementById('root'));
-  }// end of function runSearchQuery
-
-  /* Function to clear search results and return to just the news feed
-  */
-  clearSearchResults(){
-
-    console.log("clearing search restuls")
-    this.PlaymateNewsEntries = AllNews;
-    ReactDOM.render(<App />, document.getElementById('root'));
-  }
-
 
   render() {
 
@@ -102,7 +97,7 @@ export default class App extends React.Component {
           <img id="bunnyHeader" src="bunny-logo-feature-300.gif"/> PLAYMATE NEWS 
           <form onSubmit={ (e)=> {
             e.preventDefault(); 
-            this.runSearchQuery();
+            runSearchQuery();
           }}>
           <div className="searchBar">
             <button id="searchButton" >Search</button>
@@ -111,7 +106,7 @@ export default class App extends React.Component {
           </form>
         </div>
         <div className="newsEntries">
-        <this.PlaymateNewsEntries postQuery={this.clearSearchResults}/>
+        <PlaymateNewsEntries/>
         </div>
 
         <Mutation mutation={ADD_NEWS} onCompleted={this.addEntryComplete.bind(this)} variables={this.state}>
@@ -142,7 +137,7 @@ export default class App extends React.Component {
               <button>Add</button>
             </div>
             <div className="addRow">
-              <this.AddResults />
+              <AddResults />
             </div>
           </form>
 
